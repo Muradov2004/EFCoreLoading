@@ -10,7 +10,7 @@ namespace EFCoreLoading
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
-    {
+    { 
         public ObservableCollection<Book> books { get; } = new();
 
         public MainWindow()
@@ -32,9 +32,9 @@ namespace EFCoreLoading
                 {
                     ComboBox2.Items.Clear();
 
-                    var authors = database.Authors;
+                    var authors = database.Authors.ToList();
 
-                    authors.ToList().ForEach(a => ComboBox2.Items.Add($"{a.FirstName} {a.LastName}"));
+                    authors.ForEach(a => ComboBox2.Items.Add($"{a.FirstName} {a.LastName}"));
                 }
                 else if (selectedItem!.Content.ToString() == "Themes")
                 {
