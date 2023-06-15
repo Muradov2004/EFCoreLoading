@@ -40,17 +40,17 @@ namespace EFCoreLoading
                 {
                     ComboBox2.Items.Clear();
 
-                    var themes = database.Themes;
+                    var themes = database.Themes.ToList();
 
-                    themes.ToList().ForEach(t => ComboBox2.Items.Add($"{t.Name}"));
+                    themes.ForEach(t => ComboBox2.Items.Add($"{t.Name}"));
                 }
                 else if (selectedItem!.Content.ToString() == "Categories")
                 {
                     ComboBox2.Items.Clear();
 
-                    var categories = database.Categories;
+                    var categories = database.Categories.ToList();
 
-                    categories.ToList().ForEach(c => ComboBox2.Items.Add($"{c.Name}"));
+                    categories.ForEach(c => ComboBox2.Items.Add($"{c.Name}"));
                 }
             }
         }
