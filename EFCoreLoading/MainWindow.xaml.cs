@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 
 namespace EFCoreLoading
 {
@@ -13,22 +14,11 @@ namespace EFCoreLoading
     {
         public ObservableCollection<Book> books { get; } = new();
 
-        List<Author> authors;
-        List<Theme> themes;
-        List<Category> categories;
-
-
         public MainWindow()
         {
             InitializeComponent();
 
             DataContext = this;
-            using (LibraryContext database = new())
-            {
-                authors = database.Authors.ToList();
-                themes = database.Themes.ToList();
-                categories = database.Categories.ToList();
-            }
         }
 
         private void ComboBox1_SelectionChanged(object sender, RoutedEventArgs e)
@@ -37,26 +27,35 @@ namespace EFCoreLoading
             ComboBoxItem? selectedItem = ComboBox1.SelectedItem as ComboBoxItem;
 
             books.Clear();
-
-            if (selectedItem!.Content.ToString() == "Authors")
+            using (LibraryContext database = new())
             {
-                ComboBox2.Items.Clear();
 
-                authors.ForEach(a => ComboBox2.Items.Add($"{a.FirstName} {a.LastName}"));
+                if (selectedItem!.Content.ToString() == "Authors")
+                {
+                    ComboBox2.Items.Clear();
+
+                    var authors = database.Authors.ToList();
+
+                    authors.ForEach(a => ComboBox2.Items.Add($"{a.FirstName} {a.LastName}"));
+                }
+                else if (selectedItem!.Content.ToString() == "Themes")
+                {
+                    ComboBox2.Items.Clear();
+
+                    var themes = database.Themes.ToList();
+
+                    themes.ForEach(t => ComboBox2.Items.Add($"{t.Name}"));
+                }
+                else if (selectedItem!.Content.ToString() == "Categories")
+                {
+                    ComboBox2.Items.Clear();
+
+                    var categories = database.Categories.ToList();
+
+                    categories.ForEach(c => ComboBox2.Items.Add($"{c.Name}"));
+                }
+
             }
-            else if (selectedItem!.Content.ToString() == "Themes")
-            {
-                ComboBox2.Items.Clear();
-
-                themes.ForEach(t => ComboBox2.Items.Add($"{t.Name}"));
-            }
-            else if (selectedItem!.Content.ToString() == "Categories")
-            {
-                ComboBox2.Items.Clear();
-
-                categories.ForEach(c => ComboBox2.Items.Add($"{c.Name}"));
-            }
-
         }
 
         private void ComboBox2_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -64,80 +63,68 @@ namespace EFCoreLoading
 
             ComboBoxItem? selectedItem = ComboBox1.SelectedItem as ComboBoxItem;
 
+            books.Clear();
 
             if (selectedItem!.Content.ToString() == "Authors")
             {
-                books.Clear();
 
                 var selectedAuthor = ComboBox2.SelectedItem as string;
 
                 if (selectedAuthor != null)
                 {
 
+                    using (LibraryContext database = new())
+                    {
+                        var authors = database.Authors.ToList();
 
-                    var author = authors.FirstOrDefault(a => $"{a.FirstName} {a.LastName}" == selectedAuthor);
-                    var authorBooks = author!.Books.ToList();
-                        //.Join(
-                        //    database.Authors,
-                        //    b => b.IdAuthor,
-                        //    a => a.Id,
-                        //    (b, a) => new { Book = b, Author = a }
-                        //)
-                        //.ToList()
-                        //.Where(x => $"{x.Author.FirstName} {x.Author.LastName}" == selectedAuthor)
-                        //.Select(x => x.Book)
-                        //.ToList();
+                        var author = authors.FirstOrDefault(a => $"{a.FirstName} {a.LastName}" == selectedAuthor);
 
-                    authorBooks.ForEach(b => books.Add(b));
+                        var authorBooks = author!.Books.ToList();
+
+                        authorBooks.ForEach(b => books.Add(b));
+                    }
                 }
             }
-            //else if (selectedItem.Content.ToString() == "Themes")
-            //{
-            //    var selectedTheme = ComboBox2.SelectedItem as string;
+            else if (selectedItem.Content.ToString() == "Themes")
+            {
+                var selectedTheme = ComboBox2.SelectedItem as string;
 
-            //    if (selectedTheme != null)
-            //    {
-            //        books.Clear();
+                if (selectedTheme != null)
+                {
 
-            //        var themeBooks = database.Books
-            //            .Join(
-            //                database.Themes,
-            //                b => b.IdThemes,
-            //                t => t.Id,
-            //                (b, t) => new { Book = b, Theme = t }
-            //            )
-            //            .ToList()
-            //            .Where(x => x.Theme.Name == selectedTheme)
-            //            .Select(x => x.Book)
-            //            .ToList();
+                    using (LibraryContext database = new())
+                    {
+                        var themes = database.Themes.ToList();
 
-            //        themeBooks.ForEach(b => books.Add(b));
-            //    }
-            //}
-            //else if (selectedItem.Content.ToString() == "Categories")
-            //{
-            //    var selectedCategory = ComboBox2.SelectedItem as string;
+                        var theme = themes.FirstOrDefault(t => t.Name == selectedTheme);
 
-            //    if (selectedCategory != null)
-            //    {
-            //        books.Clear();
+                        var themeBooks = theme!.Books.ToList();
 
-            //        var categoryBooks = database.Books
-            //            .Join(
-            //                database.Categories,
-            //                b => b.IdCategory,
-            //                c => c.Id,
-            //                (b, c) => new { Book = b, Category = c }
-            //            )
-            //            .ToList()
-            //            .Where(x => x.Category.Name == selectedCategory)
-            //            .Select(x => x.Book)
-            //            .ToList();
+                        themeBooks.ForEach(b => books.Add(b));
+                    }
+                }
+            }
+            else if (selectedItem.Content.ToString() == "Categories")
+            {
+                var selectedCategory = ComboBox2.SelectedItem as string;
 
-            //        categoryBooks.ForEach(b => books.Add(b));
-            //    }
+                if (selectedCategory != null)
+                {
 
-            //}
+                    using (LibraryContext database = new())
+                    {
+                        var categories = database.Categories.ToList();
+
+                        var category = categories.FirstOrDefault(t => t.Name == selectedCategory);
+
+                        var categoryBooks = category!.Books.ToList();
+
+                        categoryBooks.ForEach(b => books.Add(b));
+                    }
+
+                }
+
+            }
 
         }
     }
